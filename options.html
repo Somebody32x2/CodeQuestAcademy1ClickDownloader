@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>CQAD Options</title>
+    <link href="options.css" rel="stylesheet" type="text/css"/>
+    <script defer src="options.js"></script>
+</head>
+<body>
+<!--        "open_pdfs": false,
+        "download_pdfs": true,
+        "download_tests": true,
+        "create_solve": true,
+        "solve_format": "solve.py",
+        "template": "# template",
+        "subdir_format": "%$name$ ($difficulty$)"-->
+<label>Open Problem PDFs <input id="open_pdfs" type="checkbox"></label>
+<label>Download Problem PDFs <input id="download_pdfs" type="checkbox"></label>
+<label>Download Tests <input id="download_tests" type="checkbox"></label>
+<label>Create Solution Files <input id="create_solve" type="checkbox"></label>
+<label>Solution File Name/Format <input id="solve_format" type="text"></label>
+<label>Solution File Template <textarea id="template"></textarea></label>
+<label>Subdirectory Format <input id="subdir_format" type="text"></label>
+<button id="save">Save</button>
+<button id="reset">Reset</button>
+
+<p id="status"></p>
+
+<p>All text fields allow <code>$difficulty$</code> to insert the problem's difficulty ('Easy'/'Medium'/'Hard') and
+    <code>$name$</code> for the alphanumeric, dash-separated name of the problem (e.g. "countdown")</p>
+
+</body>
+</html>
+<style>
+    label {
+        margin-bottom: 8px;
+    }
+
+    input {
+        padding-left: 2px;
+    }
+
+    textarea {
+        font-size: small;
+        min-width: 14rem;
+        min-height: 6rem;
+        margin-left: 4px;
+    }
+</style>

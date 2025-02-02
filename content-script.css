@@ -1,0 +1,5 @@
+.ext_download_chal:hover {
+    color: black !important;
+    background-color: #e5e7eb !important;
+    outline: 1px solid black;
+}

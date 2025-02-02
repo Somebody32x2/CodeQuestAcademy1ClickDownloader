@@ -1,0 +1,38 @@
+{
+  "name": "Code Quest Academy 1-click Downloader",
+  "version": "1.0",
+  "manifest_version": 3,
+  "minimum_chrome_version": "120",
+  "description": "Adds buttons to automatically download all challenge files for a CQA challenge.",
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "permissions": [
+    "fileSystem",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://lmcodequestacademy.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://lmcodequestacademy.com/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "css": [
+        "content-script.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "options.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  }
+}
