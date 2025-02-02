@@ -137,7 +137,7 @@ function convert_to_real_name(str) {
         if (preserved_chars.includes(str[i])) {
             new_str += str[i];
         } else {
-            new_str += special_char_map[str[i]] || str[i];
+            new_str += special_char_map[str[i]] || "";
         }
     }
 
