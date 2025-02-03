@@ -4,6 +4,7 @@ chrome.storage.sync.get({
     "open_pdfs": false,
     "download_pdfs": true,
     "download_tests": true,
+    "unzip": true,
     "create_solve": true,
     "solve_format": "solve.py",
     "template": "# template",
@@ -48,78 +49,95 @@ let try_add_dl = () => {
         container.appendChild(button);
 
         button.addEventListener("click", async (e) => {
-            console.log("clicked " + convert_to_real_name(chal.children[0].innerText))
-            if (!download_directory) {
-                alert("Please select a download directory first and try again.");
-                download_directory = await window.showDirectoryPicker({mode: "readwrite", id: "CQA_Challenges"})
-                return;
-            }
-            let name = convert_to_real_name(chal.children[0].innerText);
+                console.log("clicked " + convert_to_real_name(chal.children[0].innerText))
+                if (!download_directory) {
+                    alert("Please select a download directory first and try again.");
+                    download_directory = await window.showDirectoryPicker({mode: "readwrite", id: "CQA_Challenges"})
+                    return;
+                }
+                let name = convert_to_real_name(chal.children[0].innerText);
 
-            button.style.backgroundColor = "#fdc700";
+                button.style.backgroundColor = "#fdc700";
 
-            // https://lmcodequestacademy.com/api/static/problems/[NAME]
-            // https://lmcodequestacademy.com/api/static/samples/[NAME]
+                // https://lmcodequestacademy.com/api/static/problems/[NAME]
+                // https://lmcodequestacademy.com/api/static/samples/[NAME]
 
-            let pdf_res = null;
-            let test_res = null;
-            if (options.download_pdfs) pdf_res = await fetch(`https://lmcodequestacademy.com/api/static/problems/${name}`);
-            if (options.download_pdfs && !pdf_res.ok) {
-                button.style.backgroundColor = "#e7000b";
-                alert("Failed to download PDF for " + name);
-                return;
-            }
-
-            if (options.download_tests) test_res = await fetch(`https://lmcodequestacademy.com/api/static/samples/${name}`);
-            if (options.download_tests && !test_res.ok) {
-                button.style.backgroundColor = "#e7000b";
-                alert("Failed to download tests for " + name);
-                return;
-            }
-
-            // Make a subdir for the challenge
-            let subdir_name = options.subdir_format.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase());
-            let chal_dir = await download_directory.getDirectoryHandle(subdir_name, {create: true});
-
-            if (options.download_pdfs) {
-                let pdf_blob = await pdf_res.blob();
-                console.log(pdf_blob.size);
-                if (pdf_blob.size <= 100) {
+                let pdf_res = null;
+                let test_res = null;
+                if (options.download_pdfs) pdf_res = await fetch(`https://lmcodequestacademy.com/api/static/problems/${name}`);
+                if (options.download_pdfs && !pdf_res.ok) {
+                    button.style.backgroundColor = "#e7000b";
                     alert("Failed to download PDF for " + name);
                     return;
                 }
-                let pdf_file = await chal_dir.getFileHandle("problem.pdf", {create: true});
-                pdf_file.createWritable().then(writable => {
-                    writable.write(pdf_blob);
-                    writable.close()
-                });
-            }
 
-            if (options.open_pdfs) {
-                window.open(`https://lmcodequestacademy.com/api/static/problems/${name}`, "_blank");
-                console.log("opened " + name);
-            }
+                if (options.download_tests) test_res = await fetch(`https://lmcodequestacademy.com/api/static/samples/${name}`);
+                if (options.download_tests && !test_res.ok) {
+                    button.style.backgroundColor = "#e7000b";
+                    alert("Failed to download tests for " + name);
+                    return;
+                }
 
-            if (options.download_tests) {
-                let test_blob = await test_res.blob();
-                let test_file = await chal_dir.getFileHandle("tests.zip", {create: true});
-                test_file.createWritable().then(writable => {
-                    writable.write(test_blob);
-                    writable.close()
-                });
-            }
+                // Make a subdir for the challenge
+                let subdir_name = options.subdir_format.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase());
+                let chal_dir = await download_directory.getDirectoryHandle(subdir_name, {create: true});
 
-            // Create a solve file
-            if (options.create_solve) {
-                let solve_file = await chal_dir.getFileHandle(options.solve_format.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase()), {create: true});
-                let solve_writer = await solve_file.createWritable();
-                await solve_writer.write(options.template.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase()));
-                await solve_writer.close();
-            }
+                if (options.download_pdfs) {
+                    let pdf_blob = await pdf_res.blob();
+                    console.log(pdf_blob.size);
+                    if (pdf_blob.size <= 100) {
+                        alert("Failed to download PDF for " + name);
+                        return;
+                    }
+                    let pdf_file = await chal_dir.getFileHandle("problem.pdf", {create: true});
+                    pdf_file.createWritable().then(writable => {
+                        writable.write(pdf_blob);
+                        writable.close()
+                    });
+                }
 
-            button.classList.remove("bg-gray-800");
-            button.style.backgroundColor = "green";
-        })
+                if (options.open_pdfs) {
+                    window.open(`https://lmcodequestacademy.com/api/static/problems/${name}`, "_blank");
+                    console.log("opened " + name);
+                }
+
+                if (options.download_tests) {
+                    let test_blob = await test_res.blob();
+                    if (!options.unzip) {
+                        let test_file = await chal_dir.getFileHandle("tests.zip", {create: true});
+                        test_file.createWritable().then(writable => {
+                            writable.write(test_blob);
+                            writable.close()
+                        });
+                    }
+
+                    if (options.unzip) {
+                        const zipFileReader = new zip.ZipReader(new zip.BlobReader(test_blob));
+                        console.log(await zipFileReader.getEntries());
+                        const entries = await zipFileReader.getEntries();
+                        for (const entry of entries) {
+                            if (entry.directory) {
+                                continue
+                            }
+                            const writer = await (await chal_dir.getFileHandle(entry.filename, {create: true})).createWritable();
+                            await entry.getData(writer);
+                        }
+                        zipFileReader.close();
+                    }
+                }
+
+                // Create a solve file
+                if (options.create_solve) {
+                    let solve_file = await chal_dir.getFileHandle(options.solve_format.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase()), {create: true});
+                    let solve_writer = await solve_file.createWritable();
+                    await solve_writer.write(options.template.replaceAll("$name$", name).replaceAll("$difficulty$", chal.children[1].innerText.toLowerCase()));
+                    await solve_writer.close();
+                }
+
+                button.classList.remove("bg-gray-800");
+                button.style.backgroundColor = "green";
+            }
+        )
 
     });
 }

@@ -20,6 +20,7 @@
         "https://lmcodequestacademy.com/*"
       ],
       "js": [
+        "zip.min.js",
         "content-script.js"
       ],
       "css": [

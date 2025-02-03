@@ -16,7 +16,8 @@ const saveOptions = () => {
             "create_solve": document.getElementById('create_solve').checked,
             "solve_format": document.getElementById('solve_format').value,
             "template": document.getElementById('template').value,
-            "subdir_format": document.getElementById('subdir_format').value
+            "subdir_format": document.getElementById('subdir_format').value,
+            "unzip": document.getElementById('unzip').checked
         },
         () => {
             // Update status to let user know options were saved.
@@ -38,6 +39,7 @@ const restoreOptions = () => {
             "download_pdfs": true,
             "download_tests": true,
             "create_solve": true,
+            "unzip": true,
             "solve_format": "solve.py",
             "template": "# template",
             "subdir_format": "$name$ ($difficulty$)"
@@ -50,6 +52,7 @@ const restoreOptions = () => {
             document.getElementById('solve_format').value = items.solve_format;
             document.getElementById('template').value = items.template;
             document.getElementById('subdir_format').value = items.subdir_format
+            document.getElementById('unzip').checked = items.unzip;
         }
     );
 };
